@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="$(SolutionDir)/stylecop.json" Link="stylecop.json" />
+    <None Include="$(SolutionDir)/.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <StartYear>2021</StartYear>
+    <EndYear>$([System.DateTime]::Today.Year)</EndYear>
+    <FullYear Condition="'$(StartYear)'=='$(EndYear)'">$(StartYear)</FullYear>
+    <FullYear Condition="'$(StartYear)'!='$(EndYear)'">$(StartYear)-$(EndYear)</FullYear>
+
+    <!-- Properties related to packaging -->
+    <Authors>Nils Andresen</Authors>
+    <Copyright>Copyright © $(FullYear) — Nils Andresen</Copyright>
+    <Description>An implementation of an ITypeRegistrar for Spectre.Console using SimpleInjector</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/nils-org/Spectre.Console.Registrars.SimpleInjector</PackageProjectUrl>
+    <PackageTags>spectre;commandline;console;dependency;injection;di;registrar;simpleinjector</PackageTags>
+    <RepositoryUrl>https://github.com/nils-org/Spectre.Console.Registrars.SimpleInjector.git</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/nils-org/Spectre.Console.Registrars.SimpleInjector/releases</PackageReleaseNotes>
+    <Version>0.0.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="SimpleInjector" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="Spectre.Console" Version="0.38.0" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
