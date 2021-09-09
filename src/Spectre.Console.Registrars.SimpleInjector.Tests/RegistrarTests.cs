@@ -72,6 +72,33 @@ namespace Spectre.Console.Registrars.SimpleInjector.Tests
             factoryCalled.ShouldBeFalse();
         }
 
+        [Fact]
+        public void Resolver_Registering_Multiple_Does_Not_Throw()
+        {
+            var fixture = new RegistrarFixture();
+            fixture.GivenMultiRegistrationTypes(typeof(ISomeInterface));
+            fixture.GivenOnRegistrar(r => r.Register(typeof(ISomeInterface), typeof(SomeDependency)));
+            fixture.GivenOnRegistrar(r => r.Register(typeof(ISomeInterface), typeof(SomeOtherDependency)));
+
+            var actual = fixture.GetResolver().Resolve(typeof(ISomeInterface));
+
+            actual.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Resolver_Resolving_From_Multiple_Returns_The_Last_Registration()
+        {
+            var fixture = new RegistrarFixture();
+            fixture.GivenMultiRegistrationTypes(typeof(ISomeInterface));
+            fixture.GivenOnRegistrar(r => r.Register(typeof(ISomeInterface), typeof(SomeDependency)));
+            fixture.GivenOnRegistrar(r => r.Register(typeof(ISomeInterface), typeof(SomeOtherDependency)));
+
+            var actual = fixture.GetResolver().Resolve(typeof(ISomeInterface));
+
+            actual.ShouldNotBeNull();
+            actual.ShouldBeOfType<SomeOtherDependency>();
+        }
+
         private interface ISomeInterface
         {
         }

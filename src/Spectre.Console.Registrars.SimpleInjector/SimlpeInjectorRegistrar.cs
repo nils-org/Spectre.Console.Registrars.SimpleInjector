@@ -84,16 +84,18 @@ namespace Spectre.Console.Registrars.SimpleInjector
         public ITypeResolver Build()
         {
             container.Verify();
-            return new SimpleInjectorTypeResolver(container);
+            return new SimpleInjectorTypeResolver(container, multiRegistrationTypes);
         }
 
         private class SimpleInjectorTypeResolver : ITypeResolver
         {
             private readonly Container container;
+            private readonly Type[] multiRegistrationTypes;
 
-            public SimpleInjectorTypeResolver(Container container)
+            public SimpleInjectorTypeResolver(Container container, Type[] multiRegistrationTypes)
             {
                 this.container = container;
+                this.multiRegistrationTypes = multiRegistrationTypes;
             }
 
             public object Resolve(Type type)
@@ -101,6 +103,11 @@ namespace Spectre.Console.Registrars.SimpleInjector
                 if (type == null)
                 {
                     throw new ArgumentNullException(nameof(type));
+                }
+
+                if (multiRegistrationTypes.Contains(type))
+                {
+                    return container.GetAllInstances(type).LastOrDefault();
                 }
 
                 return container.GetInstance(type);
