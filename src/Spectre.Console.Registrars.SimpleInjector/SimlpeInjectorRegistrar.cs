@@ -3,16 +3,17 @@ using System.Linq;
 using SimpleInjector;
 using Spectre.Console.Cli;
 
-namespace Spectre.Console.Registrars.SimpleInjector
+// ReSharper disable once CheckNamespace
+namespace Spectre.Console
 {
     /// <summary>
     /// Implements <see cref="ITypeRegistrar"/> using a SimpleInjector <see cref="Container"/>.
     /// </summary>
     public class SimpleInjectorRegistrar : ITypeRegistrar
     {
-        private readonly Container _container;
-        private readonly Lifestyle _lifestyle;
-        private readonly Type[] _multiRegistrationTypes;
+        private readonly Container container;
+        private readonly Lifestyle lifestyle;
+        private readonly Type[] multiRegistrationTypes;
 
         /// <summary>
         /// Constructs a new instance using the the given <see cref="Container" />.
@@ -29,13 +30,13 @@ namespace Spectre.Console.Registrars.SimpleInjector
         /// <param name="multiRegistrationTypes">List of types that are to be registered multiple times.
         /// Default is [ <see cref="ICommand{TSettings}"/>, <see cref="ICommand"/> ].</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public SimpleInjectorRegistrar(Container container, 
+        public SimpleInjectorRegistrar(Container container,
             Lifestyle lifestyle = null,
             Type[] multiRegistrationTypes = null)
         {
-            _container = container ?? throw new ArgumentNullException(nameof(container));
-            _lifestyle = lifestyle ?? Lifestyle.Singleton;
-            _multiRegistrationTypes = multiRegistrationTypes ?? new[]
+            this.container = container ?? throw new ArgumentNullException(nameof(container));
+            this.lifestyle = lifestyle ?? Lifestyle.Singleton;
+            this.multiRegistrationTypes = multiRegistrationTypes ?? new[]
             {
                 typeof(ICommand),
                 typeof(ICommand<>)
@@ -45,55 +46,57 @@ namespace Spectre.Console.Registrars.SimpleInjector
         /// <inheritdoc cref="ITypeRegistrar.Register"/>
         public void Register(Type service, Type implementation)
         {
-            if (_multiRegistrationTypes.Contains(service))
+            if (multiRegistrationTypes.Contains(service))
             {
-                _container.Collection.Append(service, implementation, _lifestyle);
+                container.Collection.Append(service, implementation, lifestyle);
                 return;
             }
 
-            _container.Register(service, implementation, _lifestyle);
+            container.Register(service, implementation, lifestyle);
         }
 
         /// <inheritdoc cref="ITypeRegistrar.RegisterInstance"/>
         public void RegisterInstance(Type service, object implementation)
         {
-            if (_multiRegistrationTypes.Contains(service))
+            if (multiRegistrationTypes.Contains(service))
             {
-                _container.Collection.AppendInstance(service, implementation);
+                container.Collection.AppendInstance(service, implementation);
                 return;
             }
-            
-            _container.RegisterInstance(service, implementation);
+
+            container.RegisterInstance(service, implementation);
         }
 
         /// <inheritdoc cref="ITypeRegistrar.RegisterLazy"/>
         public void RegisterLazy(Type service, Func<object> factory)
         {
             // todo: non of these code-paths are lazy!!
-            if (_multiRegistrationTypes.Contains(service))
+            if (multiRegistrationTypes.Contains(service))
             {
-                // todo: this ignores the lifestyle, but seemingly Func<object> can not be used on collections.
-                _container.Collection.AppendInstance(service, factory());
+                var registration = lifestyle.CreateRegistration(service, factory, container);
+                container.Collection.Append(service, registration);
                 return;
             }
-            
-            _container.Register(service, factory, _lifestyle);
+
+            container.Register(service, factory, lifestyle);
         }
 
         /// <inheritdoc cref="ITypeRegistrar.Build"/>
         public ITypeResolver Build()
         {
-            _container.Verify();
-            return new SimpleInjectorTypeResolver(_container);
+            container.Verify();
+            return new SimpleInjectorTypeResolver(container, multiRegistrationTypes);
         }
 
         private class SimpleInjectorTypeResolver : ITypeResolver
         {
-            private readonly Container _container;
+            private readonly Container container;
+            private readonly Type[] multiRegistrationTypes;
 
-            public SimpleInjectorTypeResolver(Container container)
+            public SimpleInjectorTypeResolver(Container container, Type[] multiRegistrationTypes)
             {
-                _container = container;
+                this.container = container;
+                this.multiRegistrationTypes = multiRegistrationTypes;
             }
 
             public object Resolve(Type type)
@@ -103,7 +106,11 @@ namespace Spectre.Console.Registrars.SimpleInjector
                     throw new ArgumentNullException(nameof(type));
                 }
 
-                return _container.GetInstance(type);
+                var implementation = multiRegistrationTypes.Contains(type)
+                    ? container.GetAllInstances(type).LastOrDefault()
+                    : container.GetInstance(type);
+
+                return implementation;
             }
         }
     }
