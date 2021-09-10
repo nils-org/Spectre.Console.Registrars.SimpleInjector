@@ -1,4 +1,6 @@
-﻿using Shouldly;
+﻿using System;
+
+using Shouldly;
 
 using Xunit;
 
@@ -6,6 +8,17 @@ namespace Spectre.Console.Registrars.SimpleInjector.Tests
 {
     public class RegistrarTests
     {
+        [Fact]
+        public void Resolver_Resolving_null_Throws()
+        {
+            var fixture = new RegistrarFixture();
+            var resolver = fixture.GetResolver();
+
+            Action action = () => resolver.Resolve(null);
+
+            action.ShouldThrow<ArgumentNullException>();
+        }
+
         [Fact]
         public void Resolver_Should_Return_Registration_From_Container()
         {
@@ -56,6 +69,20 @@ namespace Spectre.Console.Registrars.SimpleInjector.Tests
             ReferenceEquals(expected, actual).ShouldBeTrue();
         }
 
+        [Fact]
+        public void Resolver_Resolving_From_Multiple_Lazies_Returns_The_Last_Registration()
+        {
+            var fixture = new RegistrarFixture();
+            fixture.GivenMultiRegistrationTypes(typeof(ISomeInterface));
+            fixture.GivenOnRegistrar(r => r.RegisterLazy(typeof(ISomeInterface), () => new SomeDependency()));
+            fixture.GivenOnRegistrar(r => r.RegisterLazy(typeof(ISomeInterface), () => new SomeOtherDependency()));
+
+            var actual = fixture.GetResolver().Resolve(typeof(ISomeInterface));
+
+            actual.ShouldNotBeNull();
+            actual.ShouldBeOfType<SomeOtherDependency>();
+        }
+
         [Fact(Skip = "Doesn't work at the moment")]
         public void Resolver_Should_Not_Call_Lazy_Factory_If_Not_Needed()
         {
@@ -92,6 +119,20 @@ namespace Spectre.Console.Registrars.SimpleInjector.Tests
             fixture.GivenMultiRegistrationTypes(typeof(ISomeInterface));
             fixture.GivenOnRegistrar(r => r.Register(typeof(ISomeInterface), typeof(SomeDependency)));
             fixture.GivenOnRegistrar(r => r.Register(typeof(ISomeInterface), typeof(SomeOtherDependency)));
+
+            var actual = fixture.GetResolver().Resolve(typeof(ISomeInterface));
+
+            actual.ShouldNotBeNull();
+            actual.ShouldBeOfType<SomeOtherDependency>();
+        }
+
+        [Fact]
+        public void Resolver_Resolving_From_Multiple_Instances_Returns_The_Last_Registration()
+        {
+            var fixture = new RegistrarFixture();
+            fixture.GivenMultiRegistrationTypes(typeof(ISomeInterface));
+            fixture.GivenOnRegistrar(r => r.RegisterInstance(typeof(ISomeInterface), new SomeDependency()));
+            fixture.GivenOnRegistrar(r => r.RegisterInstance(typeof(ISomeInterface), new SomeOtherDependency()));
 
             var actual = fixture.GetResolver().Resolve(typeof(ISomeInterface));
 

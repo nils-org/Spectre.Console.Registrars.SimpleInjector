@@ -3,7 +3,8 @@ using System.Linq;
 using SimpleInjector;
 using Spectre.Console.Cli;
 
-namespace Spectre.Console.Registrars.SimpleInjector
+// ReSharper disable once CheckNamespace
+namespace Spectre.Console
 {
     /// <summary>
     /// Implements <see cref="ITypeRegistrar"/> using a SimpleInjector <see cref="Container"/>.
@@ -72,8 +73,8 @@ namespace Spectre.Console.Registrars.SimpleInjector
             // todo: non of these code-paths are lazy!!
             if (multiRegistrationTypes.Contains(service))
             {
-                // todo: this ignores the lifestyle, but seemingly Func<object> can not be used on collections.
-                container.Collection.AppendInstance(service, factory());
+                var registration = lifestyle.CreateRegistration(service, factory, container);
+                container.Collection.Append(service, registration);
                 return;
             }
 
@@ -105,12 +106,11 @@ namespace Spectre.Console.Registrars.SimpleInjector
                     throw new ArgumentNullException(nameof(type));
                 }
 
-                if (multiRegistrationTypes.Contains(type))
-                {
-                    return container.GetAllInstances(type).LastOrDefault();
-                }
+                var implementation = multiRegistrationTypes.Contains(type)
+                    ? container.GetAllInstances(type).LastOrDefault()
+                    : container.GetInstance(type);
 
-                return container.GetInstance(type);
+                return implementation;
             }
         }
     }
