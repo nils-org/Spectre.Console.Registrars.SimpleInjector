@@ -64,10 +64,18 @@ namespace Spectre.Console
             {
                 if (type == null)
                 {
-                    throw new ArgumentNullException(nameof(type));
+                    return null;
                 }
 
-                var implementation = container.GetInstance(type);
+                object implementation = null;
+                try
+                {
+                    implementation = container.GetInstance(type);
+                }
+                catch (ActivationException)
+                {
+                    // ignored
+                }
 
                 return implementation;
             }
