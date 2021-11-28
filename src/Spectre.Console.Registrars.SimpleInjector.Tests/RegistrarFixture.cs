@@ -12,16 +12,10 @@ namespace Spectre.Console.Registrars.SimpleInjector.Tests
         private readonly List<Action<Container>> containerActions = new List<Action<Container>>();
         private readonly List<Action<ITypeRegistrar>> registrarActions = new List<Action<ITypeRegistrar>>();
         private Lifestyle lifestyle;
-        private Type[] multiRegistrationTypes;
 
         internal void GivenLifestyle(Lifestyle lifestyle)
         {
             this.lifestyle = lifestyle;
-        }
-
-        internal void GivenMultiRegistrationTypes(params Type[] multiRegistrationTypes)
-        {
-            this.multiRegistrationTypes = multiRegistrationTypes;
         }
 
         internal void GivenOnContainer(Action<Container> action)
@@ -42,7 +36,7 @@ namespace Spectre.Console.Registrars.SimpleInjector.Tests
                 action(container);
             }
 
-            var registrar = new SimpleInjectorRegistrar(container, lifestyle, multiRegistrationTypes);
+            var registrar = new SimpleInjectorRegistrar(container, lifestyle);
             foreach (var action in registrarActions)
             {
                 action(registrar);
