@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Shouldly;
 
-using Shouldly;
+using SimpleInjector;
+
+using Spectre.Console.Testing;
 
 using Xunit;
 
@@ -9,14 +11,15 @@ namespace Spectre.Console.Registrars.SimpleInjector.Tests
     public class RegistrarTests
     {
         [Fact]
-        public void Resolver_Resolving_null_Throws()
+        public void Should_Pass_Base_Tests()
         {
-            var fixture = new RegistrarFixture();
-            var resolver = fixture.GetResolver();
+            var baseTests = new TypeRegistrarBaseTests(() =>
+            {
+                var container = new Container();
+                return new SimpleInjectorRegistrar(container);
+            });
 
-            Action action = () => resolver.Resolve(null);
-
-            action.ShouldThrow<ArgumentNullException>();
+            baseTests.RunAllTests();
         }
 
         [Fact]
