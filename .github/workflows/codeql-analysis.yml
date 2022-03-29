@@ -30,26 +30,26 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
-    - uses: actions/setup-dotnet@v1.9.0
+    - uses: actions/setup-dotnet@v2.0.0
       with:
         # codecov needs 2.1
         dotnet-version: '2.1.818'
-    - uses: actions/setup-dotnet@v1.9.0
+    - uses: actions/setup-dotnet@v2.0.0
       with:
         dotnet-version: '3.1.x'
-    - uses: actions/setup-dotnet@v1.9.0
+    - uses: actions/setup-dotnet@v2.0.0
       with:
         dotnet-version: '5.0.x'
-    - uses: actions/setup-dotnet@v1.9.0
+    - uses: actions/setup-dotnet@v2.0.0
       with:
         dotnet-version: '6.0.x'
 
     - name: Cache Tools
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: tools
         key: ${{ runner.os }}-tools-${{ hashFiles('recipe.cake') }}
