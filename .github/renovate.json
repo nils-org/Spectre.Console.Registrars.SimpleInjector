@@ -1,10 +1,28 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [ "github>nils-a/renovate-config" ],
-  "packageRules": [
-    {
-      "matchPackageNames": ["cake.tool", "Spectre.Console", "SimpleInjector"],
-      "enabled": false
-    }
-  ]
-}
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [ "github>nils-org/renovate-config:minimal" ],
+    "packageRules": [
+      {
+        "matchPackageNames": [
+          "cake.tool",
+          "SimpleInjector"
+        ],
+        "matchUpdateTypes": ["minor", "patch"],
+        "enabled": false
+      },
+      {
+        "matchPackageNames": [
+          "SimpleInjector"
+        ],
+        "matchUpdateTypes": ["major"],
+        "labels": ["Breaking Change"]
+      },
+      {
+        "matchPackagePatterns": [
+          "^Spectre\\.Console\\..*"
+        ],
+        "matchUpdateTypes": ["major", "minor"],
+        "labels": ["Breaking Change"]
+      }
+    ]
+  }
