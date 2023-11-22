@@ -34,7 +34,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="SimpleInjector" Version="5.0.0" PrivateAssets="all" />
-    <PackageReference Include="Spectre.Console.Cli" Version="0.47.0" PrivateAssets="all" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.48.0" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
