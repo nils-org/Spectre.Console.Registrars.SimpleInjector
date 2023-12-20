@@ -8,6 +8,9 @@
 
 An implementation of an ITypeRegistrar for Spectre.Console using SimpleInjector
 
+**This library is deprecated, SimpleInjector can not fulfilly all required features
+to implement an ITypeRegistrar!**
+
 ## Table of Contents
 
 - [Install](#install)
